@@ -107,41 +107,35 @@ export default function Navbar({ user, profile }: NavbarProps) {
           <div className="hidden md:flex items-center gap-3">
             {user && profile ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                    <Avatar className="h-8 w-8 border border-border">
-                      <AvatarImage src={profile.avatar_url || undefined} />
-                      <AvatarFallback className="bg-primary-muted text-primary text-xs font-semibold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-text text-sm font-medium">
-                      {profile.full_name}
-                    </span>
-                  </button>
+                <DropdownMenuTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity outline-none">
+                  <Avatar className="h-8 w-8 border border-border">
+                    <AvatarImage src={profile.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary-muted text-primary text-xs font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-text text-sm font-medium">
+                    {profile.full_name}
+                  </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
                   className="w-48 bg-surface border-border"
                 >
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/profil"
-                      className="flex items-center gap-2 text-text cursor-pointer"
-                    >
-                      <User size={16} />
-                      Profil
-                    </Link>
+                  <DropdownMenuItem
+                    onClick={() => router.push("/profil")}
+                    className="flex items-center gap-2 text-text cursor-pointer"
+                  >
+                    <User size={16} />
+                    Profil
                   </DropdownMenuItem>
                   {isAdmin && (
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/admin"
-                        className="flex items-center gap-2 text-text cursor-pointer"
-                      >
-                        <Shield size={16} />
-                        Admin Panel
-                      </Link>
+                    <DropdownMenuItem
+                      onClick={() => router.push("/admin")}
+                      className="flex items-center gap-2 text-text cursor-pointer"
+                    >
+                      <Shield size={16} />
+                      Admin Panel
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator className="bg-border" />
@@ -158,16 +152,16 @@ export default function Navbar({ user, profile }: NavbarProps) {
               <>
                 <Button
                   variant="ghost"
-                  asChild
+                  onClick={() => router.push("/login")}
                   className="text-text-muted hover:text-text hover:bg-surface"
                 >
-                  <Link href="/login">Masuk</Link>
+                  Masuk
                 </Button>
                 <Button
-                  asChild
+                  onClick={() => router.push("/register")}
                   className="bg-primary hover:bg-primary-hover text-background font-semibold rounded-lg transition-all duration-300"
                 >
-                  <Link href="/register">Daftar</Link>
+                  Daftar
                 </Button>
               </>
             )}
@@ -175,10 +169,10 @@ export default function Navbar({ user, profile }: NavbarProps) {
 
           {/* Mobile Menu Button */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="text-text hover:bg-surface">
+            <SheetTrigger className="md:hidden">
+              <div className="inline-flex items-center justify-center h-10 w-10 text-text hover:bg-surface rounded-md transition-colors">
                 <Menu size={24} />
-              </Button>
+              </div>
             </SheetTrigger>
             <SheetContent
               side="right"
@@ -247,20 +241,22 @@ export default function Navbar({ user, profile }: NavbarProps) {
                     <>
                       <Button
                         variant="ghost"
-                        asChild
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          router.push("/login");
+                        }}
                         className="w-full justify-center text-text-muted hover:text-text hover:bg-background"
                       >
-                        <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                          Masuk
-                        </Link>
+                        Masuk
                       </Button>
                       <Button
-                        asChild
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          router.push("/register");
+                        }}
                         className="w-full justify-center bg-primary hover:bg-primary-hover text-background font-semibold rounded-lg"
                       >
-                        <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                          Daftar
-                        </Link>
+                        Daftar
                       </Button>
                     </>
                   )}

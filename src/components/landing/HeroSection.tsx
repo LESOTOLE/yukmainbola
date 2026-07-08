@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
 export default function HeroSection() {
+  const router = useRouter();
   const scrollToJadwal = () => {
     const el = document.querySelector("#jadwal");
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -64,11 +66,11 @@ export default function HeroSection() {
           style={{ animationDelay: "0.6s" }}
         >
           <Button
-            asChild
             size="lg"
+            onClick={() => router.push("/register")}
             className="bg-primary hover:bg-primary-hover text-background font-semibold rounded-lg px-8 py-6 text-base transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02]"
           >
-            <Link href="/register">Gabung Sekarang</Link>
+            Gabung Sekarang
           </Button>
           <Button
             variant="outline"

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, Phone, Instagram } from "lucide-react";
+import { Mail, Phone, Camera } from "lucide-react";
 
 const quickLinks = [
   { label: "Jadwal", href: "#jadwal" },
@@ -18,7 +18,7 @@ const contactLinks = [
   {
     label: "Instagram",
     href: "https://instagram.com/yukmainbola",
-    icon: Instagram,
+    icon: Camera,
   },
   {
     label: "Email",
