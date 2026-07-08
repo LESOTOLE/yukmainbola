@@ -3,7 +3,15 @@ import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { createClient } from "@/lib/supabase/server";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Yuk Main Bola — Komunitas Minisoccer",
@@ -12,15 +20,32 @@ export const metadata: Metadata = {
   keywords: ["minisoccer", "futsal", "komunitas", "mabar", "bola"],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let profile = null;
+  if (user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    profile = data;
+  }
+
   return (
-    <html lang="id" className={cn("dark", "font-sans", geist.variable)}>
-      <body className={`${geist.variable} font-sans antialiased`}>
-        {children}
+    <html lang="id" className="dark">
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <Navbar user={user} profile={profile} />
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );
