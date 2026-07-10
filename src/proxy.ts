@@ -10,7 +10,7 @@ const protectedRoutes = ["/profil"];
 // Routes that require admin role
 const adminRoutes = ["/admin"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { supabaseResponse, user, supabase } = await updateSession(request);
   const { pathname } = request.nextUrl;
 

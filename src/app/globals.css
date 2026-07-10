@@ -5,16 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: #0a0f1a;
-  --color-surface: #111827;
-  --color-surface-hover: #1a2332;
-  --color-primary: #22c55e;
-  --color-primary-hover: #4ade80;
-  --color-primary-muted: rgba(34, 197, 94, 0.1);
-  --color-accent: #10b981;
-  --color-text: #f1f5f9;
-  --color-text-muted: #94a3b8;
-  --color-border: #1e293b;
+  --color-background: #0a1c15; /* Dark Green / Teal */
+  --color-surface: #11281f;    /* Slightly lighter surface */
+  --color-surface-hover: #1a382b; 
+  --color-primary: #6fc5a4;    /* Mint Green from Logo */
+  --color-primary-hover: #5bb090;
+  --color-primary-muted: rgba(111, 197, 164, 0.15);
+  --color-accent: #ffd40c;     /* Gold/Yellow from Logo */
+  --color-text: #fcfbf5;       /* Ivory (Warm Off-white) */
+  --color-text-muted: #9badb2; /* Muted teal-gray */
+  --color-border: #1e3f31;
   --color-danger: #ef4444;
   --color-danger-hover: #dc2626;
 

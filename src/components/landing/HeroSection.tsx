@@ -48,7 +48,7 @@ export default function HeroSection() {
           className="text-5xl md:text-7xl font-bold tracking-tight mb-6 opacity-0 animate-slide-up"
           style={{ animationDelay: "0.2s" }}
         >
-          <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+          <span className="text-text">
             Yuk Main Bola
           </span>
         </h1>

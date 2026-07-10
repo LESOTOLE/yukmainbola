@@ -3,8 +3,7 @@ import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { ClientNavbar, ClientFooter } from "@/components/layout/ClientLayoutWrapper";
 import { createClient } from "@/lib/supabase/server";
 
 const inter = Inter({
@@ -42,10 +41,18 @@ export default async function RootLayout({
 
   return (
     <html lang="id" className="dark">
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <Navbar user={user} profile={profile} />
+      <head>
+        <script 
+          type="text/javascript"
+          src="https://app.sandbox.midtrans.com/snap/snap.js"
+          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+          async
+        />
+      </head>
+      <body className={`${inter.variable} font-sans antialiased bg-background text-text min-h-screen flex flex-col`}>
+        <ClientNavbar user={user} profile={profile} />
         <main>{children}</main>
-        <Footer />
+        <ClientFooter />
       </body>
     </html>
   );

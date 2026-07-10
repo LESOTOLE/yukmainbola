@@ -2,10 +2,13 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { formatDate, formatCurrency, formatTime } from "@/lib/utils/format";
 import type { ScheduleWithVenue } from "@/types/database";
+import { useRealtimeSlots } from "@/hooks/useRealtimeSlots";
 
 interface JadwalPreviewProps {
   schedules: ScheduleWithVenue[];
@@ -38,73 +41,14 @@ export default function JadwalPreview({ schedules }: JadwalPreviewProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {schedules.map((schedule, index) => {
-              const slotsLeft = schedule.max_players - schedule.current_players;
-              const isFull = slotsLeft === 0;
-
-              return (
-                <Card
-                  key={schedule.id}
-                  className={`bg-surface border-border hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 overflow-hidden ${
-                    isIntersecting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                  }`}
-                  style={{
-                    transitionDelay: isIntersecting ? `${(index + 1) * 150}ms` : "0ms",
-                  }}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-text font-semibold text-lg">
-                        {schedule.venues.name}
-                      </h3>
-                      <Badge
-                        variant={isFull ? "destructive" : "default"}
-                        className={
-                          isFull
-                            ? "bg-danger/10 text-danger border-danger/20"
-                            : "bg-primary-muted text-primary border-primary/20"
-                        }
-                      >
-                        {isFull ? "Penuh" : `${slotsLeft} slot`}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-center gap-2 text-text-muted">
-                        <Calendar size={16} className="text-primary" />
-                        <span>{formatDate(schedule.date)}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-text-muted">
-                        <Clock size={16} className="text-primary" />
-                        <span>
-                          {formatTime(schedule.start_time)} -{" "}
-                          {formatTime(schedule.end_time)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-text-muted">
-                        <MapPin size={16} className="text-primary" />
-                        <span className="truncate">{schedule.venues.address}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-text-muted">
-                        <Users size={16} className="text-primary" />
-                        <span>
-                          {schedule.current_players}/{schedule.max_players} pemain
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <p className="text-primary font-bold text-lg">
-                        {formatCurrency(schedule.price_per_person)}
-                        <span className="text-text-muted font-normal text-sm">
-                          /orang
-                        </span>
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {schedules.map((schedule, index) => (
+              <ScheduleCard 
+                key={schedule.id}
+                schedule={schedule}
+                index={index}
+                isIntersecting={isIntersecting}
+              />
+            ))}
           </div>
         )}
 
@@ -119,5 +63,85 @@ export default function JadwalPreview({ schedules }: JadwalPreviewProps) {
         </div>
       </div>
     </section>
+  );
+}
+
+function ScheduleCard({ schedule, index, isIntersecting }: { schedule: ScheduleWithVenue, index: number, isIntersecting: boolean }) {
+  const currentPlayers = useRealtimeSlots('schedules', schedule.id, schedule.current_players);
+  const slotsLeft = schedule.max_players - currentPlayers;
+  const isFull = slotsLeft <= 0;
+
+  return (
+    <Card
+      className={`bg-surface border-border hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 overflow-hidden ${
+        isIntersecting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+      style={{
+        transitionDelay: isIntersecting ? `${(index + 1) * 150}ms` : "0ms",
+      }}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <h3 className="text-text font-semibold text-lg">
+            {schedule.venues.name}
+          </h3>
+          <Badge
+            variant={isFull ? "destructive" : "default"}
+            className={
+              isFull
+                ? "bg-danger/10 text-danger border-danger/20"
+                : "bg-primary-muted text-primary border-primary/20"
+            }
+          >
+            {isFull ? "Penuh" : `${slotsLeft} slot`}
+          </Badge>
+        </div>
+
+        <div className="space-y-3 text-sm">
+          <div className="flex items-center gap-2 text-text-muted">
+            <Calendar size={16} className="text-primary" />
+            <span>{formatDate(schedule.date)}</span>
+          </div>
+          <div className="flex items-center gap-2 text-text-muted">
+            <Clock size={16} className="text-primary" />
+            <span>
+              {formatTime(schedule.start_time)} -{" "}
+              {formatTime(schedule.end_time)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-text-muted">
+            <MapPin size={16} className="text-primary" />
+            <span className="truncate">{schedule.venues.address}</span>
+          </div>
+          <div className="flex items-center gap-2 text-text-muted">
+            <Users size={16} className="text-primary" />
+            <span>
+              {currentPlayers}/{schedule.max_players} pemain
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-border">
+          <p className="text-primary font-bold text-lg">
+            {formatCurrency(schedule.price_per_person)}
+            <span className="text-text-muted font-normal text-sm">
+              /orang
+            </span>
+          </p>
+        </div>
+      </CardContent>
+
+      <div className="flex flex-col gap-2 p-6 pt-0">
+        <Link 
+          href={`/jadwal/${schedule.id}`}
+          className="w-full inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-background font-semibold rounded-lg transition-colors h-10 px-4 py-2"
+        >
+          Join Mabar
+        </Link>
+        <p className="text-center text-xs text-text-muted">
+          {slotsLeft <= 0 ? 0 : slotsLeft} slot tersisa
+        </p>
+      </div>
+    </Card>
   );
 }

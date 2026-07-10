@@ -3,15 +3,7 @@
 -- Run this in Supabase SQL Editor
 -- ============================================
 
--- Helper function: get current user's role
-CREATE OR REPLACE FUNCTION public.get_user_role()
-RETURNS TEXT
-LANGUAGE sql
-SECURITY DEFINER
-STABLE
-AS $$
-  SELECT role FROM public.profiles WHERE id = auth.uid();
-$$;
+
 
 -- ============================================
 -- Table: profiles
@@ -27,6 +19,16 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Helper function: get current user's role
+CREATE OR REPLACE FUNCTION public.get_user_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT role FROM public.profiles WHERE id = auth.uid();
+$$;
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 

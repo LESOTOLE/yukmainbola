@@ -9,6 +9,17 @@ export interface Profile {
   bio: string | null;
   created_at: string;
   updated_at: string;
+  points_balance?: number;
+}
+
+export interface PointTransaction {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: 'earned' | 'redeemed' | 'refunded';
+  reference_id: string | null;
+  description: string | null;
+  created_at: string;
 }
 
 export interface Venue {
@@ -55,4 +66,51 @@ export interface Testimonial {
 
 export interface TestimonialWithProfile extends Testimonial {
   profiles: Pick<Profile, "full_name" | "avatar_url">;
+}
+
+export interface Booking {
+  id: string;
+  schedule_id: string;
+  user_id: string;
+  status: "booked" | "cancelled";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BookingWithSchedule extends Booking {
+  schedules: ScheduleWithVenue;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  date: string;
+  start_time: string;
+  end_time: string;
+  venue_id: string | null;
+  max_participants: number;
+  current_participants: number;
+  price: number;
+  status: "upcoming" | "ongoing" | "completed" | "cancelled";
+  created_at: string;
+}
+
+export interface EventWithVenue extends Event {
+  venues: Venue | null;
+}
+
+export interface EventParticipant {
+  id: string;
+  event_id: string;
+  user_id: string;
+  status: "registered" | "cancelled";
+  payment_status: "pending" | "paid" | "failed" | "expired";
+  snap_token: string | null;
+  order_id: string | null;
+  created_at: string;
+}
+
+export interface EventParticipantWithEvent extends EventParticipant {
+  events: EventWithVenue;
 }

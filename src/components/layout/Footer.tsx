@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Phone, Camera } from "lucide-react";
 
 const quickLinks = [
@@ -34,10 +35,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Column 1: About */}
           <div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              ⚽ Yuk Main Bola
-            </span>
-            <p className="mt-3 text-text-muted text-sm leading-relaxed">
+            <div className="flex items-center gap-3 mb-3">
+              <Image src="/images/YMB.png" alt="Yuk Main Bola Logo" width={56} height={56} className="object-contain" />
+              <span className="text-xl font-bold text-text">
+                Yuk Main Bola
+              </span>
+            </div>
+            <p className="text-text-muted text-sm leading-relaxed">
               Komunitas minisoccer terbuka untuk semua kalangan. Temukan jadwal
               mabar, gabung tim, dan nikmati serunya bermain bola bersama.
             </p>

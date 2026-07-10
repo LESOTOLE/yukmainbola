@@ -63,9 +63,9 @@ export default function TestimoniSection({ testimonials }: TestimoniSectionProps
                   </p>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border border-border">
-                      <AvatarImage src={testimoni.profiles.avatar_url || undefined} />
+                      <AvatarImage src={testimoni.profiles?.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary-muted text-primary text-sm font-semibold">
-                        {testimoni.profiles.full_name
+                        {(testimoni.profiles?.full_name || "Member")
                           .split(" ")
                           .map((n) => n[0])
                           .join("")
@@ -75,7 +75,7 @@ export default function TestimoniSection({ testimonials }: TestimoniSectionProps
                     </Avatar>
                     <div>
                       <p className="text-text font-medium text-sm">
-                        {testimoni.profiles.full_name}
+                        {testimoni.profiles?.full_name || "Member"}
                       </p>
                       <p className="text-text-muted text-xs">Member</p>
                     </div>

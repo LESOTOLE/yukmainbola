@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ interface NavbarProps {
 
 const navLinks = [
   { label: "Jadwal", href: "#jadwal" },
+  { label: "Event", href: "/event" },
   { label: "Galeri", href: "#galeri" },
   { label: "Testimoni", href: "#testimoni" },
   { label: "Venue", href: "#venue" },
@@ -57,11 +59,13 @@ export default function Navbar({ user, profile }: NavbarProps) {
 
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false);
-    if (href.startsWith("#")) {
+    if (href.startsWith("#") && window.location.pathname === "/") {
       const element = document.querySelector(href);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       }
+    } else {
+      router.push(href.startsWith("#") ? "/" + href : href);
     }
   };
 
@@ -84,9 +88,10 @@ export default function Navbar({ user, profile }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-              ⚽ Yuk Main Bola
+          <Link href="/" className="flex items-center gap-3 group">
+            <Image src="/images/YMB.png" alt="Yuk Main Bola Logo" width={48} height={48} className="object-contain group-hover:opacity-80 transition-opacity" />
+            <span className="text-xl font-bold text-text group-hover:opacity-80 transition-opacity hidden sm:block">
+              Yuk Main Bola
             </span>
           </Link>
 

@@ -22,3 +22,12 @@ export function formatTime(timeString: string): string {
   const parts = timeString.split(":");
   return `${parts[0]}:${parts[1]}`;
 }
+
+export function formatShortDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
