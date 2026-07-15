@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export function useRealtimeSlots(table: 'schedules' | 'events', recordId: string, initialCount: number) {
   const [currentCount, setCurrentCount] = useState(initialCount);
+  
+  // Cached supabase client instance
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     setCurrentCount(initialCount);
   }, [initialCount]);
 
   useEffect(() => {
-    const supabase = createClient();
-
-    // Generate a unique channel name to avoid Strict Mode collisions
-    // where .on() is called after the channel from the previous render is already subscribed
-    const channelName = `realtime_${table}_${recordId}_${Math.random().toString(36).substring(7)}`;
+    // Deterministic channel name, no Math.random() spam
+    const channelName = `realtime_${table}_${recordId}`;
     
     const channel = supabase
       .channel(channelName)
@@ -44,7 +44,7 @@ export function useRealtimeSlots(table: 'schedules' | 'events', recordId: string
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [table, recordId]);
+  }, [supabase, table, recordId]);
 
   return currentCount;
 }

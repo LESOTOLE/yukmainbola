@@ -52,6 +52,8 @@ export default async function JadwalDetailPage({ params }: JadwalDetailProps) {
     .from("bookings")
     .select(`
       user_id,
+      quantity,
+      guest_names,
       profiles (
         full_name,
         avatar_url
@@ -196,21 +198,36 @@ export default async function JadwalDetailPage({ params }: JadwalDetailProps) {
                       const profile = Array.isArray(booking.profiles) ? booking.profiles[0] : booking.profiles;
                       const name = profile?.full_name || "Member";
                       const isMe = booking.user_id === user?.id;
+                      const qty = (booking as any).quantity || 1;
+                      const guests: string[] = (booking as any).guest_names || [];
                       
                       return (
-                        <div key={i} className={`flex items-center gap-3 p-3 rounded-lg border ${isMe ? 'bg-primary/5 border-primary/20' : 'bg-background border-border'}`}>
-                          <Avatar className="h-10 w-10 border border-border">
-                            <AvatarImage src={profile?.avatar_url || undefined} />
-                            <AvatarFallback className="bg-surface-hover text-text text-sm">
-                              {name.substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium text-text flex items-center gap-2">
-                              {name}
-                              {isMe && <span className="text-[10px] bg-primary text-background px-1.5 rounded uppercase tracking-wider font-bold">Anda</span>}
-                            </p>
+                        <div key={i} className={`p-3 rounded-lg border ${isMe ? 'bg-primary/5 border-primary/20' : 'bg-background border-border'}`}>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10 border border-border">
+                              <AvatarImage src={profile?.avatar_url || undefined} />
+                              <AvatarFallback className="bg-surface-hover text-text text-sm">
+                                {name.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-text flex items-center gap-2">
+                                {name}
+                                {isMe && <span className="text-[10px] bg-primary text-background px-1.5 rounded uppercase tracking-wider font-bold">Anda</span>}
+                                {qty > 1 && <span className="text-[10px] bg-accent/20 text-accent px-1.5 py-0.5 rounded font-semibold">+{qty - 1} teman</span>}
+                              </p>
+                            </div>
                           </div>
+                          {guests.length > 0 && (
+                            <div className="mt-2 ml-[52px] space-y-1">
+                              {guests.map((guestName: string, gi: number) => (
+                                <p key={gi} className="text-xs text-text-muted flex items-center gap-1.5">
+                                  <span className="w-4 h-4 rounded-full bg-surface-hover text-[10px] flex items-center justify-center font-medium">{gi + 2}</span>
+                                  {guestName}
+                                </p>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )
                     })}

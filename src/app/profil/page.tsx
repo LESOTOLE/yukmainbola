@@ -32,6 +32,8 @@ export default async function ProfilPage() {
       status,
       payment_status,
       snap_token,
+      quantity,
+      guest_names,
       created_at,
       schedules (
         id,
@@ -221,6 +223,9 @@ export default async function ProfilPage() {
                     {upcomingBookings.map((booking: any) => {
                       const schedule = Array.isArray(booking.schedules) ? booking.schedules[0] : booking.schedules;
                       const venue = Array.isArray(schedule.venues) ? schedule.venues[0] : schedule.venues;
+                      const qty = booking.quantity || 1;
+                      const guests: string[] = booking.guest_names || [];
+                      const totalPrice = schedule.price_per_person * qty;
                       
                       return (
                         <div key={booking.id} className="bg-surface rounded-xl p-5 border border-border flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center transition-all hover:border-primary/30">
@@ -244,10 +249,25 @@ export default async function ProfilPage() {
                                 {venue?.name}
                               </div>
                             </div>
+                            {qty > 1 && (
+                              <div className="flex flex-wrap items-center gap-2 mt-1">
+                                <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-semibold border border-accent/20">
+                                  {qty} orang
+                                </span>
+                                {guests.length > 0 && (
+                                  <span className="text-xs text-text-muted">
+                                    — {guests.join(", ")}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                           
                           <div className="flex flex-col items-end gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                            <span className="text-primary font-bold">{formatCurrency(schedule.price_per_person)}</span>
+                            <span className="text-primary font-bold">
+                              {formatCurrency(totalPrice)}
+                              {qty > 1 && <span className="text-xs text-text-muted font-normal ml-1">({qty}×{formatCurrency(schedule.price_per_person)})</span>}
+                            </span>
                             <span className={`px-2 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider mb-2 ${
                               booking.payment_status === 'paid' ? 'bg-primary/20 text-primary border border-primary/30' :
                               'bg-accent/20 text-accent border border-accent/30'

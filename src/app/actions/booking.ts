@@ -5,7 +5,12 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { snap } from "@/lib/midtrans";
 
-export async function joinMabar(scheduleId: string, usePoints: boolean = false) {
+export async function joinMabar(
+  scheduleId: string,
+  quantity: number = 1,
+  guestNames: string[] = [],
+  usePoints: boolean = false
+) {
   try {
     const supabase = await createClient();
     
@@ -34,14 +39,34 @@ export async function joinMabar(scheduleId: string, usePoints: boolean = false) 
       return { success: false, message: "Jadwal tidak ditemukan." };
     }
 
-    // Insert booking as pending
+    // Validate quantity
+    const qty = Math.max(1, Math.min(20, Math.floor(quantity)));
+    const availableSlots = schedule.max_players - schedule.current_players;
+
+    if (availableSlots <= 0) {
+      return { success: false, message: "Maaf, kuota untuk jadwal ini sudah penuh." };
+    }
+
+    if (qty > availableSlots) {
+      return { success: false, message: `Slot tidak cukup. Sisa slot tersedia: ${availableSlots}.` };
+    }
+
+    // Validate guest names: should have exactly (qty - 1) names if qty > 1
+    const cleanedGuestNames = guestNames
+      .map(name => name.trim())
+      .filter(name => name.length > 0)
+      .slice(0, qty - 1);
+
+    // Insert booking with quantity and guest names
     const { data: booking, error: insertError } = await supabase
       .from("bookings")
       .insert({
         schedule_id: scheduleId,
         user_id: user.id,
         status: "booked",
-        payment_status: "pending"
+        payment_status: "pending",
+        quantity: qty,
+        guest_names: cleanedGuestNames
       })
       .select()
       .single();
@@ -50,8 +75,8 @@ export async function joinMabar(scheduleId: string, usePoints: boolean = false) 
       if (insertError.code === "23505") {
         return { success: false, message: "Anda sudah terdaftar di jadwal ini." };
       }
-      if (insertError.message.includes("Jadwal sudah penuh")) {
-        return { success: false, message: "Maaf, kuota untuk jadwal ini sudah penuh." };
+      if (insertError.message.includes("Slot tidak cukup") || insertError.message.includes("Jadwal sudah penuh")) {
+        return { success: false, message: "Maaf, slot tidak mencukupi untuk jumlah yang diminta." };
       }
       console.error("Booking error:", insertError);
       return { success: false, message: "Terjadi kesalahan saat memproses pendaftaran. Silakan coba lagi." };
@@ -60,20 +85,23 @@ export async function joinMabar(scheduleId: string, usePoints: boolean = false) 
     const venueName = Array.isArray(schedule.venues) ? schedule.venues[0]?.name : schedule.venues?.name;
     const orderId = `YMB-${booking.id.split('-')[0]}-${Date.now()}`;
     
-    // Calculate points to use
+    // Calculate total price based on quantity
+    const totalPrice = schedule.price_per_person * qty;
+
+    // Calculate points to use (max 50% of total price)
     let pointsToUse = 0;
     if (usePoints && profile?.points_balance && profile.points_balance > 0) {
-      const maxPoints = Math.floor(schedule.price_per_person * 0.5);
+      const maxPoints = Math.floor(totalPrice * 0.5);
       pointsToUse = Math.min(profile.points_balance, maxPoints);
     }
     
-    const finalPrice = schedule.price_per_person - pointsToUse;
+    const finalPrice = totalPrice - pointsToUse;
     
     const itemDetails = [{
       id: schedule.id.substring(0, 10),
       price: schedule.price_per_person,
-      quantity: 1,
-      name: `Mabar di ${venueName || 'Venue'}`
+      quantity: qty,
+      name: `Mabar di ${venueName || 'Venue'}${qty > 1 ? ` (${qty} orang)` : ''}`
     }];
     
     if (pointsToUse > 0) {

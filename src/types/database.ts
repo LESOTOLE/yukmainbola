@@ -73,6 +73,11 @@ export interface Booking {
   schedule_id: string;
   user_id: string;
   status: "booked" | "cancelled";
+  quantity: number;
+  guest_names: string[];
+  payment_status: "pending" | "paid" | "failed" | "expired";
+  snap_token: string | null;
+  order_id: string | null;
   created_at: string;
   updated_at: string;
 }

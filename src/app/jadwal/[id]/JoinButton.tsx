@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { joinMabar } from "@/app/actions/booking";
-import { CheckCircle2, Loader2, XCircle, CreditCard, Coins } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle, Coins, Minus, Plus, UserPlus } from "lucide-react";
 import { useRealtimeSlots } from "@/hooks/useRealtimeSlots";
 import { useEffect } from "react";
 import { formatCurrency } from "@/lib/utils/format";
@@ -35,6 +35,7 @@ interface JoinButtonProps {
 export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPlayers, isLoggedIn, pointsBalance = 0, price = 0 }: JoinButtonProps) {
   const currentPlayers = useRealtimeSlots('schedules', scheduleId, initialPlayers);
   const isFull = currentPlayers >= maxPlayers;
+  const availableSlots = Math.max(0, maxPlayers - currentPlayers);
   
   const [hasNotifiedFull, setHasNotifiedFull] = useState(false);
   
@@ -47,6 +48,8 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [usePoints, setUsePoints] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [guestNames, setGuestNames] = useState<string[]>([]);
   const [status, setStatus] = useState<{ success: boolean; message: string } | null>(null);
   const router = useRouter();
 
@@ -55,7 +58,37 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
       router.push("/login");
       return;
     }
+    // Reset state when opening modal
+    setQuantity(1);
+    setGuestNames([]);
+    setUsePoints(false);
     setShowModal(true);
+  };
+
+  const handleQuantityChange = (newQty: number) => {
+    const clamped = Math.max(1, Math.min(newQty, availableSlots, 20));
+    setQuantity(clamped);
+
+    // Adjust guest names array to match (qty - 1)
+    if (clamped <= 1) {
+      setGuestNames([]);
+    } else {
+      setGuestNames(prev => {
+        const needed = clamped - 1;
+        if (prev.length < needed) {
+          return [...prev, ...Array(needed - prev.length).fill("")];
+        }
+        return prev.slice(0, needed);
+      });
+    }
+  };
+
+  const handleGuestNameChange = (index: number, value: string) => {
+    setGuestNames(prev => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
   };
 
   const handleConfirmJoin = async () => {
@@ -63,7 +96,7 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
     setStatus(null);
 
     try {
-      const result = await joinMabar(scheduleId, usePoints);
+      const result = await joinMabar(scheduleId, quantity, guestNames, usePoints);
       setStatus(result);
       
       if (result.success && result.token) {
@@ -96,9 +129,10 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
     }
   };
 
-  const maxPointsToUse = Math.floor(price * 0.5);
+  const totalPrice = price * quantity;
+  const maxPointsToUse = Math.floor(totalPrice * 0.5);
   const actualPointsToUse = Math.min(pointsBalance, maxPointsToUse);
-  const finalPrice = usePoints && actualPointsToUse > 0 ? price - actualPointsToUse : price;
+  const finalPrice = usePoints && actualPointsToUse > 0 ? totalPrice - actualPointsToUse : totalPrice;
 
   if (isBooked) {
     return (
@@ -138,16 +172,92 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
       </Button>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="sm:max-w-md bg-background border-border">
+        <DialogContent className="sm:max-w-md bg-background border-border max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">Konfirmasi Pendaftaran</DialogTitle>
           </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-text-muted">Harga Tiket</span>
-              <span className="font-semibold text-text">{formatCurrency(price)}</span>
+          <div className="py-4 space-y-5">
+            {/* Quantity Selector */}
+            <div>
+              <label className="text-sm font-medium text-text mb-2 block">Jumlah Orang</label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleQuantityChange(quantity - 1)}
+                  disabled={quantity <= 1}
+                  className="h-10 w-10 rounded-lg border border-border bg-surface hover:bg-surface-hover flex items-center justify-center text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Minus size={16} />
+                </button>
+                <div className="flex-1 text-center">
+                  <span className="text-2xl font-bold text-text">{quantity}</span>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    {quantity === 1 ? "Individu" : `${quantity} orang`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleQuantityChange(quantity + 1)}
+                  disabled={quantity >= availableSlots || quantity >= 20}
+                  className="h-10 w-10 rounded-lg border border-border bg-surface hover:bg-surface-hover flex items-center justify-center text-text disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <p className="text-xs text-text-muted mt-2 text-center">
+                Sisa slot tersedia: <span className="font-semibold text-primary">{availableSlots}</span>
+              </p>
+            </div>
+
+            {/* Guest Name Inputs */}
+            {quantity > 1 && (
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-text flex items-center gap-2">
+                  <UserPlus size={16} className="text-primary" />
+                  Nama Teman (Opsional)
+                </label>
+                <div className="space-y-2">
+                  {guestNames.map((name, index) => (
+                    <div key={index} className="relative">
+                      <input
+                        type="text"
+                        placeholder={`Nama teman ke-${index + 1}`}
+                        value={name}
+                        onChange={(e) => handleGuestNameChange(index, e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-text placeholder:text-text-muted/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                        maxLength={50}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-text-muted bg-background px-1.5 py-0.5 rounded">
+                        #{index + 2}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-text-muted">
+                  Anda adalah pemain #1. Nama teman bersifat opsional, tapi membantu admin di lapangan.
+                </p>
+              </div>
+            )}
+
+            {/* Price Breakdown */}
+            <div className="bg-surface rounded-lg p-3 border border-border space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-text-muted">Harga per Orang</span>
+                <span className="text-text">{formatCurrency(price)}</span>
+              </div>
+              {quantity > 1 && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-text-muted">Jumlah Orang</span>
+                  <span className="text-text">×{quantity}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center text-sm font-medium border-t border-border pt-2">
+                <span className="text-text">Subtotal</span>
+                <span className="text-text">{formatCurrency(totalPrice)}</span>
+              </div>
             </div>
             
+            {/* Points Section */}
             {pointsBalance > 0 && (
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-3">
                 <div className="flex justify-between items-center">
@@ -171,6 +281,7 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
               </div>
             )}
             
+            {/* Total */}
             <div className="border-t border-border pt-4 flex justify-between items-center">
               <span className="font-bold text-text">Total Bayar</span>
               <span className="font-bold text-xl text-primary">{formatCurrency(finalPrice)}</span>
@@ -180,7 +291,7 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
             <Button variant="outline" onClick={() => setShowModal(false)} className="text-text">Batal</Button>
             <Button onClick={handleConfirmJoin} className="bg-primary hover:bg-primary-hover text-background" disabled={isLoading}>
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Lanjut Pembayaran
+              {quantity > 1 ? `Bayar untuk ${quantity} Orang` : "Lanjut Pembayaran"}
             </Button>
           </DialogFooter>
         </DialogContent>
