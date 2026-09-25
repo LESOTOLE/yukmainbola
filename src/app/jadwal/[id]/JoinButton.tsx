@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { joinMabar } from "@/app/actions/booking";
 import { CheckCircle2, Loader2, XCircle, Coins, Minus, Plus, UserPlus } from "lucide-react";
 import { useRealtimeSlots } from "@/hooks/useRealtimeSlots";
-import { useEffect } from "react";
 import { formatCurrency } from "@/lib/utils/format";
 import {
   Dialog,
@@ -37,14 +36,14 @@ export default function JoinButton({ scheduleId, isBooked, initialPlayers, maxPl
   const isFull = currentPlayers >= maxPlayers;
   const availableSlots = Math.max(0, maxPlayers - currentPlayers);
   
-  const [hasNotifiedFull, setHasNotifiedFull] = useState(false);
+  const hasNotifiedFullRef = useRef(false);
   
   useEffect(() => {
-    if (isFull && !hasNotifiedFull && initialPlayers < maxPlayers) {
+    if (isFull && !hasNotifiedFullRef.current && initialPlayers < maxPlayers) {
       alert("Slot baru saja penuh!");
-      setHasNotifiedFull(true);
+      hasNotifiedFullRef.current = true;
     }
-  }, [isFull, hasNotifiedFull, initialPlayers, maxPlayers]);
+  }, [isFull, initialPlayers, maxPlayers]);
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [usePoints, setUsePoints] = useState(false);

@@ -36,7 +36,7 @@ export default function TestimonialsSection({ testimonials }: { testimonials: an
                   ))}
                 </div>
                 
-                <p className="text-text leading-relaxed mb-6 italic">"{item.content}"</p>
+                <p className="text-text leading-relaxed mb-6 italic">&quot;{item.content}&quot;</p>
                 
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">

@@ -3,13 +3,15 @@ import { createClient } from '@/lib/supabase/client';
 
 export function useRealtimeSlots(table: 'schedules' | 'events', recordId: string, initialCount: number) {
   const [currentCount, setCurrentCount] = useState(initialCount);
+  const [prevInitialCount, setPrevInitialCount] = useState(initialCount);
+
+  if (initialCount !== prevInitialCount) {
+    setPrevInitialCount(initialCount);
+    setCurrentCount(initialCount);
+  }
   
   // Cached supabase client instance
   const supabase = useMemo(() => createClient(), []);
-
-  useEffect(() => {
-    setCurrentCount(initialCount);
-  }, [initialCount]);
 
   useEffect(() => {
     // Deterministic channel name, no Math.random() spam

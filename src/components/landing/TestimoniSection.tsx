@@ -59,7 +59,7 @@ export default function TestimoniSection({ testimonials }: TestimoniSectionProps
                     ))}
                   </div>
                   <p className="text-text-muted mb-6 line-clamp-4">
-                    "{testimoni.content}"
+                    &quot;{testimoni.content}&quot;
                   </p>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border border-border">

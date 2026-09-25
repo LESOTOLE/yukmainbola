@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error midtrans-client lacks typescript definitions
 import midtransClient from "midtrans-client";
 
 export const snap = new midtransClient.Snap({

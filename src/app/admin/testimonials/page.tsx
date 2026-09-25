@@ -47,7 +47,7 @@ export default async function AdminTestimonialsPage() {
                 </div>
               </div>
               
-              <p className="text-text-muted text-sm flex-1">"{item.content}"</p>
+              <p className="text-text-muted text-sm flex-1">&quot;{item.content}&quot;</p>
               
               <div className="mt-4 pt-4 border-t border-border/50 text-xs text-text-muted">
                 {new Date(item.created_at).toLocaleDateString("id-ID", {
